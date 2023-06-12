@@ -77,7 +77,7 @@ def main():
 
     st.set_page_config(layout="wide")
 
-    locale.setlocale(locale.LC_MONETARY, 'en_IN')
+    locale.setlocale(locale.LC_MONETARY, 'en_IN.UTF-8')
 
     with st.sidebar:
         data = sp.pydantic_form(key="Input", model=Input)
