@@ -8,6 +8,7 @@ import dataclasses
 from dataclasses import dataclass
 from pydantic.json import pydantic_encoder
 import locale
+import pandas as pd
 
 import streamlit_pydantic as sp
 
@@ -15,27 +16,27 @@ import streamlit_pydantic as sp
 class Input:
     'For taking input about the car Price etc.'
 
-    cost: int = 1000000
-    engine_capacity: int = 1495
+    cost: int = 2000000
+    engine_capacity_below_1600cc: bool = True
     tax_slab: float = 35.88
     actual_fuel_expense_percentage: float = 50.0
     duration_in_years: int = 5
     yearly_depreciation_percenatage_for_tax: float = 20.0
-    yearly_depreciation_percenatage: float = 10
+    yearly_depreciation_percenatage_actual: float = 10
 
     def insurance_per_year(self):
         return self.cost / 50
 
 
     def fuel_and_maintenance_per_year(self):
-        if self.engine_capacity <= 1600:
+        if self.engine_capacity_below_1600cc:
             return 270000
 
         return 360000
 
 
     def car_perquisite_per_month(self):
-        if self.engine_capacity <= 1600:
+        if self.engine_capacity_below_1600cc:
             return 1800
 
         return 2400
@@ -75,7 +76,7 @@ class Input:
         return depreciated_value(
             self.cost,
             self.duration_in_years,
-            self.yearly_depreciation_percenatage
+            self.yearly_depreciation_percenatage_actual
         )
 
 
@@ -90,7 +91,7 @@ def main():
 
     st.set_page_config(layout="wide")
 
-    locale.setlocale(locale.LC_MONETARY, 'en_IN')
+    locale.setlocale(locale.LC_MONETARY, 'en_IN.UTF-8')
 
     with st.sidebar:
         data = sp.pydantic_form(key="Input", model=Input)
@@ -103,6 +104,7 @@ def main():
         'Actual Fuel Expenses/Month': 0 - data.actual_fuel_expenses_per_month()
     }
 
+    # st.dataframe(locale.localeconv())
     st.dataframe({k: locale.currency(v, grouping=True) for k, v in output.items()})
 
 
