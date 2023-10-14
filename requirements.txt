@@ -1,3 +1,2 @@
-pydantic==1.10.9
-streamlit==1.23.1
-streamlit_pydantic==0.6.0
+streamlit>=1.23.1
+stringcase>=1.2.0
