@@ -100,12 +100,43 @@ def showFinalProjections(data, monthlyDf, saleValueOfOldCar, investmentReturns):
     )
 
 
-def plotCostComparision(data):
+def plotCostComparision(data, saleValueOfOldCar, investmentReturns):
     'Plot the comparision between the 2 options for different values of new car'
 
     df = pd.DataFrame(index=range(1000000, 9000000, 100000))
-    df['Old Car'] = df.index
-    df['New Car'] = df.index + 2
+    df['Old Car'] = fu.calcSipFinalValue(
+        fu.getMinGrossSalPerMonth(
+            df.index,
+            data['durationInMonths'],
+            data['fuelAndMaintenancePerMonth'],
+            data['insuranceEstimatePerYear'],
+            data['carPerquisitePerMonth'],
+            data['taxSlab']
+        ) * (1 - data['taxSlab'] / 100)
+        - data['fuelAndMaintenancePerMonth']
+        - data['insuranceEstimatePerYear'] / 12,
+        data['durationInMonths'],
+        investmentReturns
+    ) + fu.calcDepreciatedValue(
+        saleValueOfOldCar,
+        data['durationInYears'],
+        data['actualDepreciation']
+    )
+
+    df['New Car'] = fu.calcLumpsumFinalValue(
+        saleValueOfOldCar,
+        data['durationInMonths'],
+        investmentReturns
+    ) - fu.calcFinalTaxOnTransfer(
+        df.index,
+        data['durationInYears'],
+        data['taxSlab'],
+        data['depreciationForTax']
+    ) + fu.calcDepreciatedValue(
+        df.index,
+        data['durationInYears'],
+        data['actualDepreciation']
+    )
 
     st.plotly_chart(
         px.line(df, y=['Old Car', 'New Car']).update_layout(
@@ -138,7 +169,7 @@ def show(data):
         df = showMonthlyData(data)
         showFinalProjections(data, df, saleValueOfOldCar, investmentReturns)
     with chart:
-        plotCostComparision(data)
+        plotCostComparision(data, saleValueOfOldCar, investmentReturns)
 
 
 if __name__ == '__main__':
