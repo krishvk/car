@@ -49,7 +49,10 @@ def getInputs():
             fu.getTaxSlabs(),
             index=5,
             format_func=lambda i: f'{i:.3f}%',
-            help='Including Surcharge and Cess'
+            help='''
+            Including Surcharge and Cess, click here for more details
+            https://incometaxindia.gov.in/charts%20%20tables/tax%20rates.htm
+            '''
         ),
         'actualDepreciation': st.slider(
             'Actual Depreciation(%)', value=10, max_value=100, format='%f',
