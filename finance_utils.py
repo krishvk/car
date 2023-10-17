@@ -39,13 +39,19 @@ def getInsuranceEstimatePerYear(cost):
     return cost / _INSURANCE_ESTIMATE_FACTOR
 
 
-def getFuelAndMaintenancePerYear(above1600cc):
+def getFuelAndMaintenancePerYear(data):
     'Returns the fuel and maintenance cost per year based on the engine capacity'
 
-    if above1600cc:
-        return _FUEL_AND_MAINTENANCE_PER_YEAR_ABOVE_1600CC
+    if data['above1600cc']:
+        return (
+            _FUEL_AND_MAINTENANCE_PER_YEAR_ABOVE_1600CC
+            * data['actualFuelAndMaintenancePercentage'] / 100
+        )
 
-    return _FUEL_AND_MAINTENANCE_PER_YEAR_BELOW_1600CC
+    return (
+        _FUEL_AND_MAINTENANCE_PER_YEAR_BELOW_1600CC
+        * data['actualFuelAndMaintenancePercentage'] / 100
+    )
 
 
 def getFuelAndMaintenancePerMonth(above1600cc):

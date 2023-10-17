@@ -57,6 +57,10 @@ def getInputs():
         'actualDepreciation': st.slider(
             'Actual Depreciation(%)', value=10, max_value=100, format='%f',
             help='Yearly depreciation expected for resale'
+        ),
+        'actualFuelAndMaintenancePercentage': st.slider(
+            'Actual Fuel And Maintenance(%)', value=100, max_value=100, format='%f',
+            help='Actual Fuel And Maintenance as a percentage of limit'
         )
     }
 
@@ -68,8 +72,8 @@ def getData(data):
 
     data['durationInYears'] = fu.getDurationInYears()
     data['durationInMonths'] = fu.getDurationInMonths()
-    data['fuelAndMaintenancePerYear'] = fu.getFuelAndMaintenancePerYear(data['above1600cc'])
-    data['fuelAndMaintenancePerMonth'] = fu.getFuelAndMaintenancePerMonth(data['above1600cc'])
+    data['fuelAndMaintenancePerYear'] = fu.getFuelAndMaintenancePerYear(data)
+    data['fuelAndMaintenancePerMonth'] = fu.getFuelAndMaintenancePerMonth(data)
     data['carPerquisitePerMonth'] = fu.getCarPerquisitePerMonth(data['above1600cc'])
     data['insuranceEstimatePerYear'] = fu.getInsuranceEstimatePerYear(data['cost'])
     data['depreciationForTax'] = fu.getDepreciationForTax()
