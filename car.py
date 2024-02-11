@@ -61,6 +61,10 @@ def getInputs():
         'actualFuelAndMaintenancePercentage': st.slider(
             'Actual Fuel And Maintenance(%)', value=100, max_value=100, format='%f',
             help='Actual Fuel And Maintenance as a percentage of limit'
+        ),
+        'investmentReturns': st.slider(
+            'ROI(%)', value=20, max_value=100, format='%f',
+            help='Expected investment returns on the amount saved'
         )
     }
 
