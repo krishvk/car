@@ -125,6 +125,9 @@ def calcSipFinalValue(sipAmount, durationInMonths, investmentReturns):
     # n = Investment duration in months
     # r = Expected rate of return
 
+    if investmentReturns == 0:
+        return sipAmount * durationInMonths
+
     i = investmentReturns / 1200
     return sipAmount * ((1 + i) ** durationInMonths - 1) * (1 + i) / i
 
