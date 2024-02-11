@@ -50,7 +50,7 @@ def showMonthlyData(data):
     return df
 
 
-def showFinalProjections(data, monthlyDf, saleValueOfOldCar, investmentReturns):
+def showFinalProjections(data, monthlyDf, saleValueOfOldCar):
     'Show the final projections'
 
     # st.header('Projected Final Values')
@@ -62,7 +62,7 @@ def showFinalProjections(data, monthlyDf, saleValueOfOldCar, investmentReturns):
                 'Investable Balance': fu.calcSipFinalValue(
                     monthlyDf.loc['Investable Balance', 'Old Car'],
                     data['durationInMonths'],
-                    investmentReturns
+                    data['investmentReturns']
                 ),
                 'Sellable value': fu.calcDepreciatedValue(
                     saleValueOfOldCar,
@@ -74,7 +74,7 @@ def showFinalProjections(data, monthlyDf, saleValueOfOldCar, investmentReturns):
                 'Sale Proceedings from Old Car': fu.calcLumpsumFinalValue(
                     saleValueOfOldCar,
                     data['durationInMonths'],
-                    investmentReturns
+                    data['investmentReturns']
                 ),
                 'Tax on Transfer': 0 - fu.calcFinalTaxOnTransfer(
                     data['cost'],
@@ -100,7 +100,7 @@ def showFinalProjections(data, monthlyDf, saleValueOfOldCar, investmentReturns):
     )
 
 
-def plotCostComparision(data, saleValueOfOldCar, investmentReturns):
+def plotCostComparision(data, saleValueOfOldCar):
     'Plot the comparision between the 2 options for different values of new car'
 
     df = pd.DataFrame(index=range(1000000, 9000000, 100000))
@@ -116,7 +116,7 @@ def plotCostComparision(data, saleValueOfOldCar, investmentReturns):
         - data['fuelAndMaintenancePerMonth']
         - data['insuranceEstimatePerYear'] / 12,
         data['durationInMonths'],
-        investmentReturns
+        data['investmentReturns']
     ) + fu.calcDepreciatedValue(
         saleValueOfOldCar,
         data['durationInYears'],
@@ -126,7 +126,7 @@ def plotCostComparision(data, saleValueOfOldCar, investmentReturns):
     df['New Car'] = fu.calcLumpsumFinalValue(
         saleValueOfOldCar,
         data['durationInMonths'],
-        investmentReturns
+        data['investmentReturns']
     ) - fu.calcFinalTaxOnTransfer(
         df.index,
         data['durationInYears'],
@@ -150,26 +150,19 @@ def plotCostComparision(data, saleValueOfOldCar, investmentReturns):
 def show(data):
     'Show the data for the second car'
 
-    col1, col2 = st.columns([1, 2])
-    with col1:
+    table, chart = st.columns([1, 2])
+    with table:
         saleValueOfOldCar = st.number_input(
             'Sale Proceedings from Old Car',
             value=1000000,
             step=10,
             format='%d'
         )
-    with col2:
-        investmentReturns = st.slider(
-            'ROI(%)', value=20, max_value=100, format='%f',
-            help='Expected investment returns on the amount saved'
-        )
 
-    table, chart = st.columns([1, 2])
-    with table:
         df = showMonthlyData(data)
-        showFinalProjections(data, df, saleValueOfOldCar, investmentReturns)
+        showFinalProjections(data, df, saleValueOfOldCar)
     with chart:
-        plotCostComparision(data, saleValueOfOldCar, investmentReturns)
+        plotCostComparision(data, saleValueOfOldCar)
 
 
 if __name__ == '__main__':
