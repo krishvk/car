@@ -31,7 +31,6 @@ def show(data):
     ) * data['taxSlab'] / 100
     df['Perq Tax'] = data['carPerquisitePerMonth'] * df.index * data['taxSlab'] / 100
     df['Investable Savings'] = df['Tax Savings (EFMI)'] - df['Perq Tax']
-    print(data['investmentReturns'])
     df['Savings Invested'] = df.apply(
         lambda i: fu.calcSipFinalValue(
             df['Investable Savings'][1],
@@ -62,7 +61,7 @@ def show(data):
 
     st.write(f'''
         At the end of tenure, you would have
-        * {su.styleCurrency(df.iloc[-1]['Seperation Cost'])} in invested savings
+        * {su.styleCurrency(df.iloc[-1]['Seperation Cost'])} in invested tax savings
         * After paying a transfer tax of {su.styleCurrency(df.iloc[-1]['Tax on Transfer'])} and
         * Posses a car with a sellable value of {su.styleCurrency(data['finalSellableValue'])}
         * With a total gain (adjusted over time) of
