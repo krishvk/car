@@ -35,7 +35,7 @@ def show(data):
         lambda i: fu.calcSipFinalValue(
             df['Investable Savings'][1],
             i.name,
-            data['investmentReturns']
+            data['annualRoi']
         ),
         axis=1
     )
