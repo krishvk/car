@@ -115,7 +115,13 @@ def getMinGrossSalPerMonth(
     )
 
 
-def calcSipFinalValue(sipAmount, durationInMonths, investmentReturns):
+def getMonthlyRoi(yearlyRoi):
+    'Returns the monthly ROI from yearly ROI'
+
+    return ((1 + yearlyRoi) ** (1 / 12)) - 1
+
+
+def calcSipFinalValue(sipAmount, durationInMonths, annualRoi):
     'Calculate the final value of SIP'
 
     # FV = Future value or the amount you get at maturity.
@@ -123,27 +129,53 @@ def calcSipFinalValue(sipAmount, durationInMonths, investmentReturns):
     # P = Amount you invest through SIP
     # i = Compounded rate of return
     # n = Investment duration in months
-    # r = Expected rate of return
 
-    if investmentReturns == 0:
+    if annualRoi == 0:
         return sipAmount * durationInMonths
 
-    i = investmentReturns / 1200
+    i = getMonthlyRoi(annualRoi)
     return sipAmount * ((1 + i) ** durationInMonths - 1) * (1 + i) / i
 
 
-def calcLumpsumFinalValue(lumpsumAmount, durationInMonths, investmentReturns):
+def calcSipInvestmentRequired(finalValue, durationInMonths, annualRoi):
+    'Calculate the SIP investment required to get the final value'
+
+    # P = FV * i / ([ (1+i)^n-1 ] * (1+i))
+    # P = Amount you invest through SIP
+    # i = Compounded rate of return
+    # n = Investment duration in months
+    # FV = Future value or the amount you get at maturity.
+
+    if annualRoi == 0:
+        return finalValue / durationInMonths
+
+    i = getMonthlyRoi(annualRoi)
+    return finalValue * i / (((1 + i) ** durationInMonths - 1) * (1 + i))
+
+
+def calcLumpsumFinalValue(lumpsumAmount, durationInMonths, annualRoi):
     'Calculate the final value of lumpsum investment'
 
     # FV = Future value or the amount you get at maturity.
     # FV = P * (1+i)^n
-    # P = Amount you invest through SIP
+    # P = Lumpsum investment
     # i = Compounded rate of return
-    # n = Investment duration in months
-    # r = Expected rate of return
+    # n = Investment duration
 
-    i = investmentReturns / 1200
+    i = getMonthlyRoi(annualRoi)
     return lumpsumAmount * ((1 + i) ** durationInMonths)
+
+
+def calcLumpsumInvestmentRequired(finalValue, durationInMonths, annualRoi):
+    'Calculate the lumpsum investment required to get the final value'
+
+    # P = FV / (1+i)^n
+    # P = Lumpsum investment
+    # i = Compounded rate of return
+    # n = Investment duration
+    # FV = Future value or the amount you get at maturity.
+    i = getMonthlyRoi(annualRoi)
+    return finalValue / ((1 + i) ** durationInMonths)
 
 
 def getTaxSlabs():
