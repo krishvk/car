@@ -17,7 +17,7 @@ import finance_utils as fu
 import streamlit_utils as su
 
 
-def showMonthlyData(data):
+def showMonthlyData(data, saleValueOfOldCar):
     'Show the monthly data'
 
     # st.header('')
@@ -27,7 +27,7 @@ def showMonthlyData(data):
             'Old Car': {
                 'Gross Post Tax': data['minGrossSalPerMonth'] * (1 - data['taxSlab'] / 100),
                 'Fuel & Maintenance': 0 - data['fuelAndMaintenancePerMonth'],
-                'Insurance': 0 - data['insuranceEstimatePerYear'] / 12,
+                'Insurance': 0 - fu.getInsuranceEstimatePerYear(saleValueOfOldCar) / 12,
             },
             'New Car': {
                 'Gross Post Tax': data['minGrossSalPerMonth'],
@@ -62,7 +62,7 @@ def showFinalProjections(data, monthlyDf, saleValueOfOldCar):
                 'Investable Balance': fu.calcSipFinalValue(
                     monthlyDf.loc['Investable Balance', 'Old Car'],
                     data['durationInMonths'],
-                    data['investmentReturns']
+                    data['annualRoi']
                 ),
                 'Sellable value': fu.calcDepreciatedValue(
                     saleValueOfOldCar,
@@ -74,7 +74,7 @@ def showFinalProjections(data, monthlyDf, saleValueOfOldCar):
                 'Sale Proceedings from Old Car': fu.calcLumpsumFinalValue(
                     saleValueOfOldCar,
                     data['durationInMonths'],
-                    data['investmentReturns']
+                    data['annualRoi']
                 ),
                 'Tax on Transfer': 0 - fu.calcFinalTaxOnTransfer(
                     data['cost'],
@@ -99,6 +99,8 @@ def showFinalProjections(data, monthlyDf, saleValueOfOldCar):
         column_order=['Old Car', 'New Car']
     )
 
+    return df.loc['Total', 'Old Car'] - df.loc['Total', 'New Car']
+
 
 def plotCostComparision(data, saleValueOfOldCar):
     'Plot the comparision between the 2 options for different values of new car'
@@ -116,7 +118,7 @@ def plotCostComparision(data, saleValueOfOldCar):
         - data['fuelAndMaintenancePerMonth']
         - data['insuranceEstimatePerYear'] / 12,
         data['durationInMonths'],
-        data['investmentReturns']
+        data['annualRoi']
     ) + fu.calcDepreciatedValue(
         saleValueOfOldCar,
         data['durationInYears'],
@@ -126,7 +128,7 @@ def plotCostComparision(data, saleValueOfOldCar):
     df['New Car'] = fu.calcLumpsumFinalValue(
         saleValueOfOldCar,
         data['durationInMonths'],
-        data['investmentReturns']
+        data['annualRoi']
     ) - fu.calcFinalTaxOnTransfer(
         df.index,
         data['durationInYears'],
@@ -150,8 +152,8 @@ def plotCostComparision(data, saleValueOfOldCar):
 def show(data):
     'Show the data for the second car'
 
-    table, chart = st.columns([1, 2])
-    with table:
+    summary, table, chart = st.columns([2, 2, 3])
+    with summary:
         saleValueOfOldCar = st.number_input(
             'Sale Proceedings from Old Car',
             value=1000000,
@@ -159,10 +161,40 @@ def show(data):
             format='%d'
         )
 
-        df = showMonthlyData(data)
-        showFinalProjections(data, df, saleValueOfOldCar)
+    with table:
+        df = showMonthlyData(data, saleValueOfOldCar)
+        delta = showFinalProjections(data, df, saleValueOfOldCar)
     with chart:
         plotCostComparision(data, saleValueOfOldCar)
+
+    with summary:
+        if delta > 0:
+            st.error('Old Car is better')
+        else:
+            delta = abs(delta)
+            st.info('New Car is better')
+
+        st.metric('By', locale.currency(delta, grouping=True))
+
+        equivalent = {
+            'lumpsum': fu.calcLumpsumInvestmentRequired(
+                delta, data['durationInMonths'], data['annualRoi']
+            ),
+            'sip': fu.calcSipInvestmentRequired(
+                delta, data['durationInMonths'], data['annualRoi']
+            )
+        }
+
+        st.write('Equivalent to')
+
+        st.metric(
+            'Upfront Lumpsum investment of',
+            locale.currency(equivalent['lumpsum'], grouping=True)
+        )
+        st.metric(
+            'SIP of',
+            locale.currency(equivalent['sip'], grouping=True)
+        )
 
 
 if __name__ == '__main__':
