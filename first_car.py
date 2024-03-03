@@ -30,21 +30,13 @@ def show(data):
         + df['Paid']
     ) * data['taxSlab'] / 100
     df['Perq Tax'] = data['carPerquisitePerMonth'] * df.index * data['taxSlab'] / 100
-    df['Investable Savings'] = df['Tax Savings (EFMI)'] - df['Perq Tax']
-    df['Savings Invested'] = df.apply(
-        lambda i: fu.calcSipFinalValue(
-            df['Investable Savings'][1],
-            i.name,
-            data['annualRoi']
-        ),
-        axis=1
-    )
+    df['Savings'] = df['Tax Savings (EFMI)'] - df['Perq Tax']
     df['Depreciated Value'] = data['cost'] * (
         (1 - data['depreciationForTax'] / 100) **
         (df.index / 12).astype(int)
     )
     df['Tax on Transfer'] = (df['Depreciated Value'] - df['Remaining']) * data['taxSlab'] / 100
-    df['Seperation Cost'] = df['Savings Invested'] - df['Tax on Transfer']
+    df['Seperation Cost'] = df['Savings'] - df['Tax on Transfer']
 
     # Format the numbers in the output
     styledDf = df.style \
@@ -52,19 +44,17 @@ def show(data):
         .map(su.styleRed, subset=['Perq Tax', 'Tax on Transfer']) \
         .map(
             su.styleGreen,
-            subset=[
-                'Tax Savings (EFMI)', 'Seperation Cost', 'Investable Savings', 'Savings Invested'
-            ]
+            subset=['Tax Savings (EFMI)', 'Seperation Cost', 'Savings']
         )
 
     st.dataframe(styledDf, use_container_width=True, height=450)
 
     st.write(f'''
         At the end of tenure, you would have
-        * {su.styleCurrency(df.iloc[-1]['Seperation Cost'])} in invested tax savings
-        * After paying a transfer tax of {su.styleCurrency(df.iloc[-1]['Tax on Transfer'])} and
+        * Saved {su.styleCurrency(df.iloc[-1]['Seperation Cost'])} in taxes
+            * After paying a transfer tax of {su.styleCurrency(df.iloc[-1]['Tax on Transfer'])}
         * Posses a car with a sellable value of {su.styleCurrency(data['finalSellableValue'])}
-        * With a total gain (adjusted over time) of
+        * With a total gain (un adjusted over time) of
         {su.styleCurrency(df.iloc[-1]['Seperation Cost'] + data['finalSellableValue'])}
     ''')
 
