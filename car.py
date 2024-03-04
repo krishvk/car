@@ -46,8 +46,8 @@ def getInputs():
         'above1600cc': st.toggle('Engine Capacity > 1600cc', False),
         'taxSlab': st.selectbox(
             'Tax Slab',
-            fu.getTaxSlabs(),
-            index=5,
+            list(reversed(fu.getTaxSlabs())),
+            index=4,
             format_func=lambda i: f'{i:.3f}%',
             help='''
             Including Surcharge and Cess, click here for more details
